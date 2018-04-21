@@ -1,0 +1,3 @@
+git+git://github.com/LevPasha/Instagram-API-python.git
+argparse
+sqlalchemy
