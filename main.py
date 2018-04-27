@@ -70,11 +70,12 @@ def main():
 
 
 if __name__ == "__main__":
+    sleeping_time = random.randint(0, 3600)
+    logger.info("Sleeping: %s s" % str(sleeping_time))
+    time.sleep(sleeping_time)
 
-    time.sleep(random.randint(0, 3600))
     for i in range(session_limitations):
         time.sleep(random.randint(minDelay_betweenSession, maxDelay_betweenSession))
-
         main()
 
 
