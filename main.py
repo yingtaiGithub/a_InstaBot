@@ -52,11 +52,11 @@ def main():
         time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
         if friendship_status.get('followed_by'):
-            logger.Info("%s followed me reversely" % expiration_following.username)
+            logger.info("%s followed me reversely" % expiration_following.username)
             add_row(Response, [expiration_following.username, expiration_following.userId, datetime.now() +
                                timedelta(hours=delay_autoMessage)])
         else:
-            logger.Info("%s have not followed me for past %ddays"%(expiration_following.username, waiting_days))
+            logger.info("%s have not followed me for past %ddays"%(expiration_following.username, waiting_days))
             add_row(NoResponse, expiration_following.username)
             api.unfollow(expiration_following.userId)
             time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
