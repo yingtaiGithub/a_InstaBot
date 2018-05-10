@@ -20,11 +20,17 @@ def main():
     selfUserInfo = api.LastJson['user']
     logger.info("Follower Count: %d" %selfUserInfo.get('follower_count', 0))
     logger.info("Following Count: %d" %selfUserInfo.get('following_count', 0))
-    time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+    random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+    logger.info("Sleeping: %s s" % str(random_sleep))
+    time.sleep(random_sleep)
 
     api.getHashtagFeed(hashtag)
     tag_items = api.LastJson.get('items', [])
-    time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+    random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+    logger.info("Sleeping: %s s" % str(random_sleep))
+    time.sleep(random_sleep)
 
     users = [x.get('user') for x in tag_items]
     usernames = []
@@ -39,7 +45,11 @@ def main():
             api.follow(user_id)
             add_row(Following, [username, user_id, date.today()])
             usernames.append(username)
-            time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+            random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+            logger.info("Sleeping: %s s" % str(random_sleep))
+            time.sleep(random_sleep)
+            # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
         if len(usernames) > limitation_per_session-1:
             break
@@ -49,7 +59,11 @@ def main():
 
         api.userFriendship(str(expiration_following.userId))
         friendship_status = api.LastJson
-        time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+        random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+        logger.info("Sleeping: %s s" % str(random_sleep))
+        time.sleep(random_sleep)
+        # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
         if friendship_status.get('followed_by'):
             logger.info("%s followed me reversely" % expiration_following.username)
@@ -59,23 +73,34 @@ def main():
             logger.info("%s have not followed me for past %ddays"%(expiration_following.username, waiting_days))
             add_row(NoResponse, expiration_following.username)
             api.unfollow(expiration_following.userId)
-            time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+            random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+            logger.info("Sleeping: %s s" % str(random_sleep))
+            time.sleep(random_sleep)
+            # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
     for row in friends_for_am():
         userId = row.userId
         api.direct_message(str(userId), message_content)
         logger.info("Sending private message to %s" % row.username)
         delete_row(row)
-        time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+
+        random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+        logger.info("Sleeping: %s s" % str(random_sleep))
+        time.sleep(random_sleep)
+        # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
 
 if __name__ == "__main__":
+#   Create db
+    Base.metadata.create_all(engine)
+
     sleeping_time = random.randint(0, 3600)
     logger.info("Sleeping: %s s" % str(sleeping_time))
-    time.sleep(sleeping_time)
+    # time.sleep(sleeping_time)
 
     for i in range(session_limitations):
-        time.sleep(random.randint(minDelay_betweenSession, maxDelay_betweenSession))
+        # time.sleep(random.randint(minDelay_betweenSession, maxDelay_betweenSession))
         main()
 
 
