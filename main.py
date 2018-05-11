@@ -1,7 +1,12 @@
 import time
 import random
 
-from InstagramAPI import InstagramAPI
+import imageio
+try:
+    from InstagramAPI import InstagramAPI
+except imageio.core.fetching.NeedDownloadError:
+    imageio.plugins.ffmpeg.download()
+    from InstagramAPI import InstagramAPI
 
 from config import *
 from logger import logger
