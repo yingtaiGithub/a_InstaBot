@@ -30,14 +30,17 @@ def main():
     logger.info("Sleeping: %s s" % str(random_sleep))
     time.sleep(random_sleep)
 
-    api.getHashtagFeed(hashtag)
-    tag_items = api.LastJson.get('items', [])
+    users = []
+    for hashtag in hashtags:
+        api.getHashtagFeed(hashtag)
+        tag_items = api.LastJson.get('items', [])
 
-    random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
-    logger.info("Sleeping: %s s" % str(random_sleep))
-    time.sleep(random_sleep)
+        random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+        logger.info("Sleeping: %s s" % str(random_sleep))
+        time.sleep(random_sleep)
 
-    users = [x.get('user') for x in tag_items]
+        users.extend([x.get('user') for x in tag_items])
+
     usernames = []
     for user in users:
         following = user.get('friendship_status').get('following')
@@ -59,6 +62,7 @@ def main():
         if len(usernames) > limitation_per_session-1:
             break
 
+
     expiration_followings = expired_followings(waiting_days)
     for expiration_following in expiration_followings:
 
@@ -79,10 +83,12 @@ def main():
             add_row(NoResponse, expiration_following.username)
             api.unfollow(expiration_following.userId)
 
-            random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
-            logger.info("Sleeping: %s s" % str(random_sleep))
-            time.sleep(random_sleep)
-            # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
+        delete_row(expiration_following)
+
+        random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
+        logger.info("Sleeping: %s s" % str(random_sleep))
+        time.sleep(random_sleep)
+        # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
     for row in friends_for_am():
         userId = row.userId
@@ -95,30 +101,22 @@ def main():
         time.sleep(random_sleep)
         # time.sleep(random.randint(minDelay_betweenAction, maxDelay_betweenAction))
 
+    api.logout()
+
 
 if __name__ == "__main__":
 #   Create db
     Base.metadata.create_all(engine)
 
-    sleeping_time = random.randint(0, 3600)
+    sleeping_time = random.randint(0, 2400)
     logger.info("Sleeping: %s s" % str(sleeping_time))
-    # time.sleep(sleeping_time)
+    time.sleep(sleeping_time)
 
     for i in range(session_limitations):
-        # time.sleep(random.randint(minDelay_betweenSession, maxDelay_betweenSession))
+        time.sleep(random.randint(minDelay_betweenSession, maxDelay_betweenSession))
         main()
 
 
-    # api = InstagramAPI(insta_account, insta_password)
-    #
-    # api.login()
-    #
-    # api.getHashtagFeed(hashtag)
-    # tag_items = api.LastJson.get('items', [])
-    # print (tag_items)
-
-    # api.userFriendship('5348044429')
-    # print (api.LastJson)
 
 
 

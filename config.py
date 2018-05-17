@@ -1,7 +1,7 @@
 insta_account = ""
 insta_password = ""
 
-hashtag = "uni"
+hashtags = ["uni", "unicorn"]
 limitation_per_session = 20
 waiting_days = 3
 delay_autoMessage = 6
