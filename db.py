@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from sqlalchemy import Column, ForeignKey, Integer, String, Date, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, Date, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -7,6 +7,19 @@ from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 engine = create_engine('sqlite:///instabot.db')
+
+
+def check_existing(table, key):
+    attributes = [i for i in table.__dict__.keys() if i[:1] != '_']
+
+    sql_client = Sql_Client()
+
+    return sql_client.session.query(table).filter(getattr(table, attributes[0]) == key).first()
+
+
+def get_first_user(table):
+    sql_client = Sql_Client()
+    return sql_client.session.query(table).first()
 
 
 def delete_row(row_object):
@@ -18,7 +31,7 @@ def delete_row(row_object):
 def expired_followings(days):
     taken_at = date.today() - timedelta(days=days)
     sql_client = Sql_Client()
-    objects = sql_client.session.query(Following).filter(Following.taken_at <= taken_at).all()
+    objects = sql_client.session.query(Following).filter(Following.taken_at <= taken_at, Following.checked == 0).all()
 
     # username_s = [object.userId for object in objects]
 
@@ -33,16 +46,23 @@ def friends_for_am():
 
 
 def add_row(table, data):
-
-    attributes = [i for i in table.__dict__.keys() if i[:1] != '_'][1:]
-    obj = table()
-
-    for attribute, value in zip(attributes, data):
-        setattr(obj, attribute, value)
-
     sql_client = Sql_Client()
-    sql_client.session.add(obj)
-    sql_client.session.commit()
+    attributes = [i for i in table.__dict__.keys() if i[:1] != '_']
+    row = sql_client.session.query(table).filter_by(username=data[0]).first()
+
+    if row:
+        for attribute, value in zip(attributes, data):
+            setattr(row, attribute, value)
+
+        sql_client.session.commit()
+
+    else:
+        obj = table()
+        for attribute, value in zip(attributes, data):
+            setattr(obj, attribute, value)
+
+        sql_client.session.add(obj)
+        sql_client.session.commit()
 
 
 def noResponse_checking(username):
@@ -60,40 +80,41 @@ class Sql_Client():
 
 class Following(Base):
     __tablename__ = 'following'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(250), nullable=False)
+    username = Column(String(250), primary_key=True)
     userId = Column(Integer, nullable=False)
     taken_at = Column(Date, nullable=False)
+    checked = Column(Boolean, nullable=False)
 
 
 class Response(Base):
     __tablename__ = 'response'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(250), nullable=False)
+    username = Column(String(250), primary_key=True)
     userId = Column(Integer, nullable=False)
     message_moment = Column(DateTime, nullable=False)
 
 
 class NoResponse(Base):
     __tablename__ = 'no_response'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(250), nullable=False)
+    username = Column(String(250), primary_key=True)
 
 
 if __name__ == "__main__":
+    pass
+
     Base.metadata.create_all(engine)
 
     # today = date.today()
-    # add_row(Following, ['aaa', '111', today-timedelta(days=2)])
+    # add_row(Following, ['aaa', '111', today-timedelta(days=2), 0])
+
+    # print(get_first_user(Following))
 
     # print (expired_followings(2)[1].userId)
     # print(type(expired_followings(2)[1].userId))
 
     # add_row(Response, ['aaaa', '111', datetime.now()])
 
-    response_row = friends_for_am()[0]
-    delete_row(response_row)
-
+    # response_row = friends_for_am()[0]
+    # delete_row(response_row)
 
     # add_row(NoResponse, ['aaaaa'])
 
@@ -104,3 +125,7 @@ if __name__ == "__main__":
 
     # now = datetime.now()
     # add_row(Response, ['bbb', now])
+
+    # print(check_existing(Following, 'kyliejenner').username)
+
+    # print(len(expired_followings(0)))
