@@ -1,7 +1,9 @@
 insta_account = ""
 insta_password = ""
 
+profiles = ['@mr.pokee', '@ezhiiiha']
 hashtags = ["uni", "unicorn"]
+
 limitation_per_session = 20
 waiting_days = 3
 delay_autoMessage = 6

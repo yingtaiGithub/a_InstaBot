@@ -26,11 +26,28 @@ def get_users_by_hashtag(api, hashtags):
         api.getHashtagFeed(hashtag)
         tag_items = api.LastJson.get('items', [])
 
-        random_sleep = random.randint(minDelay_betweenAction, maxDelay_betweenAction)
-        logger.info("Sleeping: %s s" % str(random_sleep))
-        time.sleep(random_sleep)
+        action_delay("Got Users by hashtag '%s' - %s" % hashtag)
 
         users.extend([x.get('user') for x in tag_items])
+
+    return users
+
+
+def get_users_by_profile(api, profiles):
+    users = []
+    for profile in profiles:
+        username = profile.replace("@", '')
+        api.searchUsername(username)
+        usernameId = api.LastJson.get('user').get('pk')
+
+        action_delay('Id of %s - %s' % (profile, usernameId))
+
+        next_max_id = ''
+        api.getUserFollowers(usernameId, next_max_id)
+        temp = api.LastJson
+        users.extend(temp['users'])
+
+        action_delay("Got Followers of the profile '%s'" % profile)
 
     return users
 
@@ -38,11 +55,16 @@ def get_users_by_hashtag(api, hashtags):
 def following_users(api, users):
     usernames = []
     for user in users:
-        following = user.get('friendship_status').get('following')
         username = user.get('username')
         user_id = user.get('pk')
+        # following = user.get('friendship_status').get('following')
 
-        if not (username in usernames) and not following and not noResponse_checking(username):
+        api.userFriendship(user_id)
+        following = api.LastJson.get('following')
+        followed_by = api.LastJson.get('followed_by')
+        action_delay("Friendship with %s: Following %s , Followed_by %s" % (username, following, followed_by))
+
+        if not (username in usernames) and not following and not followed_by and not noResponse_checking(username):
             api.follow(user_id)
             add_row(Following, [username, user_id, date.today(), 0])
             usernames.append(username)
@@ -133,14 +155,16 @@ def main(get_manually_followings):
     logger.info("Following Count: %d" %selfUserInfo.get('following_count', 0))
     action_delay('')
 
-    if not get_first_user(Following):
+    if not get_first_row(Following):
         get_existingFollowing(api)
     else:
         weekday = datetime.today().weekday()
         if weekday == 0 and get_manually_followings:
             save_manually_followings(api)
 
-    users = get_users_by_hashtag(api, hashtags)
+    users = get_users_by_profile(api, profiles)
+
+    users.extend(get_users_by_hashtag(api, hashtags))
 
     following_users(api, users)
 
@@ -174,8 +198,3 @@ if __name__ == "__main__":
         main(get_manually_followings)
 
         logger.info("End Session")
-
-
-
-
-

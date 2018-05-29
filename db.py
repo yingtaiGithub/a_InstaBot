@@ -17,9 +17,18 @@ def check_existing(table, key):
     return sql_client.session.query(table).filter(getattr(table, attributes[0]) == key).first()
 
 
-def get_first_user(table):
+def get_first_row(table):
     sql_client = Sql_Client()
+
     return sql_client.session.query(table).first()
+
+
+def get_firstRow_by_primaryKey(table, key):
+    attributes = [i for i in table.__dict__.keys() if i[:1] != '_']
+
+    sql_client = Sql_Client()
+
+    return sql_client.session.query(table).filter(getattr(table, attributes[0]) == key).first()
 
 
 def delete_row(row_object):
@@ -98,6 +107,13 @@ class NoResponse(Base):
     username = Column(String(250), primary_key=True)
 
 
+# class Profile(Base):
+#     __tablename__ = 'checked_profile'
+#     profile_name = Column(String(250), primary_key=True)
+#     profile_id = Column(Integer, nullable=False)
+#     max_id = Column(String(250))
+
+
 if __name__ == "__main__":
     pass
 
@@ -129,3 +145,7 @@ if __name__ == "__main__":
     # print(check_existing(Following, 'kyliejenner').username)
 
     # print(len(expired_followings(0)))
+
+    # user = get_firstRow_by_primaryKey(Following, 'k')
+    # print(user)
+    # print(user.userId)
