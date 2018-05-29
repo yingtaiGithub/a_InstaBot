@@ -104,7 +104,7 @@ def check_expiredFollowings(api):
 def auto_messaging(api):
     for row in friends_for_am():
         userId = row.userId
-        api.direct_message(str(userId), message_content)
+        api.direct_message(message_content, str(userId))
 
         delete_row(row)
 
