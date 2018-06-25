@@ -38,7 +38,11 @@ def get_users_by_profile(api, profiles):
     for profile in profiles:
         username = profile.replace("@", '')
         api.searchUsername(username)
-        usernameId = api.LastJson.get('user').get('pk')
+        try:
+            usernameId = api.LastJson.get('user').get('pk')
+        except AttributeError:
+            logger.error("No user named %s" % profile)
+            continue
 
         action_delay('Id of %s - %s' % (profile, usernameId))
 
@@ -181,14 +185,14 @@ if __name__ == "__main__":
 
     sleeping_time = random.randint(0, 2400)
     logger.info("Initial Sleeping: %s s" % str(sleeping_time))
-    time.sleep(sleeping_time)
+    # time.sleep(sleeping_time)
 
     for i in range(session_limitations):
         logger.info("\n")
         logger.info("-----------------------")
         sleeping_time = random.randint(minDelay_betweenSession, maxDelay_betweenSession)
         logger.info("Sleeping between session %s s")
-        time.sleep(sleeping_time)
+        # time.sleep(sleeping_time)
 
         if i == 0:
             get_manually_followings = True

@@ -1,3 +1,4 @@
+import os
 from datetime import date, timedelta, datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -5,8 +6,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+cur_dir = os.path.dirname(__file__)
+db_path = os.path.join(cur_dir, 'instabot.db')
 Base = declarative_base()
-engine = create_engine('sqlite:///instabot.db')
+engine = create_engine('sqlite:///%s' % db_path)
 
 
 def check_existing(table, key):
